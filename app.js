@@ -24,251 +24,232 @@ const defaultVehicles = [
     {
         id: "v3",
         make: "Rivian",
-        model: "R1T Dual-Motor",
+        model: "R1T Quad-Motor",
         year: 2024,
         bodyStyle: "Truck",
-        price: 73000,
-        hp: 533,
-        engine: "Dual-Motor Electric",
+        price: 87000,
+        hp: 835,
+        engine: "Quad-Motor Electric",
         transmission: "Single-Speed Direct-Drive"
     },
     {
         id: "v4",
-        make: "Audi",
-        model: "RS6 Avant",
+        make: "Chevrolet",
+        model: "Corvette Z06",
+        year: 2024,
+        bodyStyle: "Coupe",
+        price: 112700,
+        hp: 670,
+        engine: "5.5L Naturally Aspirated V8",
+        transmission: "8-Speed Dual-Clutch"
+    },
+    {
+        id: "v5",
+        make: "Lucid",
+        model: "Air Sapphire",
+        year: 2024,
+        bodyStyle: "Sedan",
+        price: 249000,
+        hp: 1234,
+        engine: "Tri-Motor Electric",
+        transmission: "Single-Speed Direct-Drive"
+    },
+    {
+        id: "v6",
+        make: "Lamborghini",
+        model: "Huracán Sterrato",
         year: 2023,
-        bodyStyle: "Wagon",
-        price: 125800,
-        hp: 591,
-        engine: "4.0L Twin-Turbo V8",
-        transmission: "8-Speed Tiptronic"
+        bodyStyle: "Coupe",
+        price: 278000,
+        hp: 602,
+        engine: "5.2L Naturally Aspirated V10",
+        transmission: "7-Speed Dual-Clutch"
     }
 ];
 
-let state = {
-    vehicles: [],
-    comparison: [],
-    search: "",
-    bodyStyle: "",
-    sortBy: "price-asc"
-};
-
-const STORAGE_KEY = "autospecboard_data_v1";
-
-function init() {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-        try {
-            state.vehicles = JSON.parse(saved);
-        } catch (e) {
-            state.vehicles = defaultVehicles;
-        }
-    } else {
-        state.vehicles = defaultVehicles;
-        persist();
+class VehicleManager {
+    constructor() {
+        this.vehicles = this.loadVehicles();
+        this.initElements();
+        this.bindEvents();
+        this.render();
     }
 
-    setupEventListeners();
-    render();
-}
+    loadVehicles() {
+        const stored = localStorage.getItem('auto_spec_vehicles');
+        if (stored) {
+            try {
+                return JSON.parse(stored);
+            } catch (e) {
+                console.error('Failed to parse stored vehicles:', e);
+            }
+        }
+        return defaultVehicles;
+    }
 
-function persist() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state.vehicles));
-}
+    saveVehicles() {
+        localStorage.setItem('auto_spec_vehicles', JSON.stringify(this.vehicles));
+    }
 
-function setupEventListeners() {
-    document.getElementById("search-input").addEventListener("input", (e) => {
-        state.search = e.target.value.toLowerCase();
-        renderVehicleGrid();
-    });
+    initElements() {
+        this.vehicleGrid = document.getElementById('vehicle-grid');
+        this.searchInput = document.getElementById('search-input');
+        this.filterBody = document.getElementById('filter-body');
+        this.sortSelect = document.getElementById('sort-select');
+        this.emptyState = document.getElementById('empty-state');
+        
+        this.modal = document.getElementById('vehicle-modal');
+        this.btnAddVehicle = document.getElementById('btn-add-vehicle');
+        this.btnCloseModal = document.getElementById('btn-close-modal');
+        this.btnCancel = document.getElementById('btn-cancel');
+        this.vehicleForm = document.getElementById('vehicle-form');
+        this.btnExport = document.getElementById('btn-export');
+    }
 
-    document.getElementById("body-style-filter").addEventListener("change", (e) => {
-        state.bodyStyle = e.target.value;
-        renderVehicleGrid();
-    });
+    bindEvents() {
+        this.searchInput.addEventListener('input', () => this.render());
+        this.filterBody.addEventListener('change', () => this.render());
+        this.sortSelect.addEventListener('change', () => this.render());
 
-    document.getElementById("sort-select").addEventListener("change", (e) => {
-        state.sortBy = e.target.value;
-        renderVehicleGrid();
-    });
+        this.btnAddVehicle.addEventListener('click', () => this.toggleModal(true));
+        this.btnCloseModal.addEventListener('click', () => this.toggleModal(false));
+        this.btnCancel.addEventListener('click', () => this.toggleModal(false));
+        this.modal.addEventListener('click', (e) => {
+            if (e.target === this.modal) this.toggleModal(false);
+        });
 
-    document.getElementById("btn-add-vehicle").addEventListener("click", () => {
-        document.getElementById("modal-vehicle").classList.remove("hidden");
-    });
+        this.vehicleForm.addEventListener('submit', (e) => this.handleFormSubmit(e));
+        this.btnExport.addEventListener('click', () => this.exportData());
+    }
 
-    document.getElementById("modal-close").addEventListener("click", () => {
-        document.getElementById("modal-vehicle").classList.add("hidden");
-    });
+    toggleModal(show) {
+        if (show) {
+            this.modal.classList.remove('hidden');
+            this.vehicleForm.reset();
+        } else {
+            this.modal.classList.add('hidden');
+        }
+    }
 
-    document.getElementById("vehicle-form").addEventListener("submit", (e) => {
+    handleFormSubmit(e) {
         e.preventDefault();
         const newVehicle = {
-            id: "v_" + Date.now(),
-            make: document.getElementById("input-make").value,
-            model: document.getElementById("input-model").value,
-            year: parseInt(document.getElementById("input-year").value),
-            bodyStyle: document.getElementById("input-body").value,
-            price: parseFloat(document.getElementById("input-price").value),
-            hp: parseInt(document.getElementById("input-hp").value),
-            engine: document.getElementById("input-engine").value,
-            transmission: document.getElementById("input-transmission").value
+            id: 'v_' + Date.now(),
+            make: document.getElementById('make').value.trim(),
+            model: document.getElementById('model').value.trim(),
+            year: parseInt(document.getElementById('year').value, 10),
+            bodyStyle: document.getElementById('bodyStyle').value,
+            price: parseFloat(document.getElementById('price').value),
+            hp: parseInt(document.getElementById('hp').value, 10),
+            engine: document.getElementById('engine').value.trim(),
+            transmission: document.getElementById('transmission').value.trim()
         };
 
-        state.vehicles.unshift(newVehicle);
-        persist();
-        document.getElementById("vehicle-form").reset();
-        document.getElementById("modal-vehicle").classList.add("hidden");
-        render();
-    });
-
-    document.getElementById("btn-compare").addEventListener("click", () => {
-        openMatrixModal();
-    });
-
-    document.getElementById("matrix-close").addEventListener("click", () => {
-        document.getElementById("modal-matrix").classList.add("hidden");
-    });
-
-    document.getElementById("btn-export").addEventListener("click", () => {
-        exportDataset();
-    });
-}
-
-function render() {
-    renderVehicleGrid();
-    renderComparisonTray();
-}
-
-function getFilteredAndSortedVehicles() {
-    return state.vehicles
-        .filter(v => {
-            const matchesSearch = `${v.make} ${v.model} ${v.engine}`.toLowerCase().includes(state.search);
-            const matchesBody = state.bodyStyle === "" || v.bodyStyle === state.bodyStyle;
-            return matchesSearch && matchesBody;
-        })
-        .sort((a, b) => {
-            if (state.sortBy === "price-asc") return a.price - b.price;
-            if (state.sortBy === "price-desc") return b.price - a.price;
-            if (state.sortBy === "hp-desc") return b.hp - a.hp;
-            if (state.sortBy === "year-desc") return b.year - a.year;
-            return 0;
-        });
-}
-
-function renderVehicleGrid() {
-    const grid = document.getElementById("vehicle-grid");
-    const filtered = getFilteredAndSortedVehicles();
-
-    if (filtered.length === 0) {
-        grid.innerHTML = `<p class="placeholder-text">No vehicles found matching criteria.</p>`;
-        return;
+        this.vehicles.unshift(newVehicle);
+        this.saveVehicles();
+        this.toggleModal(false);
+        this.render();
     }
 
-    grid.innerHTML = filtered.map(v => {
-        const isCompared = state.comparison.includes(v.id);
-        return `
-            <div class="vehicle-card">
-                <div class="vehicle-card-header">
-                    <div class="vehicle-title">
-                        <h3>${v.make} ${v.model}</h3>
-                        <span>${v.year} &bull; ${v.bodyStyle}</span>
-                    </div>
-                    <div class="vehicle-price">$${v.price.toLocaleString()}</div>
-                </div>
-                <div class="vehicle-specs">
-                    <div class="spec-item"><strong>${v.hp} HP</strong> Horsepower</div>
-                    <div class="spec-item"><strong>${v.engine}</strong> Engine</div>
-                </div>
-                <button class="btn ${isCompared ? 'btn-secondary' : 'btn-primary'} btn-full" onclick="toggleComparison('${v.id}')">
-                    ${isCompared ? 'Remove from Compare' : 'Add to Compare'}
-                </button>
-            </div>
-        `;
-    }).join("");
-}
+    deleteVehicle(id) {
+        if (confirm('Are you sure you want to remove this vehicle specification?')) {
+            this.vehicles = this.vehicles.filter(v => v.id !== id);
+            this.saveVehicles();
+            this.render();
+        }
+    }
 
-function toggleComparison(id) {
-    const index = state.comparison.indexOf(id);
-    if (index > -1) {
-        state.comparison.splice(index, 1);
-    } else {
-        if (state.comparison.length >= 4) {
-            alert("You can compare a maximum of 4 vehicles simultaneously.");
+    exportData() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.vehicles, null, 2));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", `auto_specs_${Date.now()}.json`);
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+    }
+
+    formatCurrency(amount) {
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
+    }
+
+    getFilteredVehicles() {
+        const query = this.searchInput.value.toLowerCase().trim();
+        const bodyFilter = this.filterBody.value;
+        const sortValue = this.sortSelect.value;
+
+        let result = this.vehicles.filter(v => {
+            const matchesSearch = 
+                v.make.toLowerCase().includes(query) ||
+                v.model.toLowerCase().includes(query) ||
+                v.engine.toLowerCase().includes(query) ||
+                v.transmission.toLowerCase().includes(query);
+            const matchesBody = bodyFilter === '' || v.bodyStyle === bodyFilter;
+            return matchesSearch && matchesBody;
+        });
+
+        if (sortValue === 'price-asc') {
+            result.sort((a, b) => a.price - b.price);
+        } else if (sortValue === 'price-desc') {
+            result.sort((a, b) => b.price - a.price);
+        } else if (sortValue === 'hp-desc') {
+            result.sort((a, b) => b.hp - a.hp);
+        } else if (sortValue === 'year-desc') {
+            result.sort((a, b) => b.year - a.year);
+        }
+
+        return result;
+    }
+
+    render() {
+        const filtered = this.getFilteredVehicles();
+        this.vehicleGrid.innerHTML = '';
+
+        if (filtered.length === 0) {
+            this.emptyState.classList.remove('hidden');
             return;
         }
-        state.comparison.push(id);
-    }
-    render();
-}
 
-function renderComparisonTray() {
-    const tray = document.getElementById("comparison-tray");
-    const countSpan = document.getElementById("comparison-count");
-    const compareBtn = document.getElementById("btn-compare");
+        this.emptyState.classList.add('hidden');
 
-    countSpan.textContent = `${state.comparison.length} / 4`;
-    compareBtn.disabled = state.comparison.length === 0;
+        filtered.forEach(v => {
+            const card = document.createElement('div');
+            card.className = 'vehicle-card';
+            card.innerHTML = `
+                <div class="card-header">
+                    <div class="vehicle-title">
+                        <h3>${v.year} ${v.make} ${v.model}</h3>
+                        <p class="vehicle-subtitle">Vehicle Specification Record</p>
+                    </div>
+                    <span class="badge">${v.bodyStyle}</span>
+                </div>
+                <div class="card-specs">
+                    <div class="spec-item">
+                        <div class="spec-label">Horsepower</div>
+                        <div class="spec-value">${v.hp} HP</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">Transmission</div>
+                        <div class="spec-value">${v.transmission}</div>
+                    </div>
+                </div>
+                <div class="card-details">
+                    <div><strong>Engine:</strong> ${v.engine}</div>
+                </div>
+                <div class="card-footer">
+                    <div class="vehicle-price">${this.formatCurrency(v.price)}</div>
+                    <button class="btn-danger-subtle" data-id="${v.id}">Remove</button>
+                </div>
+            `;
+            
+            const deleteBtn = card.querySelector('.btn-danger-subtle');
+            deleteBtn.addEventListener('click', () => this.deleteVehicle(v.id));
 
-    if (state.comparison.length === 0) {
-        tray.innerHTML = `<p class="placeholder-text">Select up to 4 vehicles to compare specs.</p>`;
-        return;
-    }
-
-    tray.innerHTML = state.comparison.map(id => {
-        const v = state.vehicles.find(item => item.id === id);
-        if (!v) return "";
-        return `
-            <div class="comparison-chip">
-                <span>${v.make} ${v.model}</span>
-                <button class="chip-remove" onclick="toggleComparison('${v.id}')">&times;</button>
-            </div>
-        `;
-    }).join("");
-}
-
-function openMatrixModal() {
-    const modalBody = document.getElementById("matrix-body");
-    const selectedVehicles = state.comparison.map(id => state.vehicles.find(v => v.id === id)).filter(Boolean);
-
-    if (selectedVehicles.length === 0) return;
-
-    const attributes = [
-        { label: "Price", key: "price", format: val => `$${val.toLocaleString()}` },
-        { label: "Year", key: "year", format: val => val },
-        { label: "Body Style", key: "bodyStyle", format: val => val },
-        { label: "Horsepower", key: "hp", format: val => `${val} HP` },
-        { label: "Engine", key: "engine", format: val => val },
-        { label: "Transmission", key: "transmission", format: val => val }
-    ];
-
-    let html = `<table class="matrix-table"><thead><tr><th>Specification</th>`;
-    selectedVehicles.forEach(v => {
-        html += `<th>${v.make} ${v.model}</th>`;
-    });
-    html += `</tr></thead><tbody>`;
-
-    attributes.forEach(attr => {
-        html += `<tr><td>${attr.label}</td>`;
-        selectedVehicles.forEach(v => {
-            html += `<td>${attr.format(v[attr.key])}</td>`;
+            this.vehicleGrid.appendChild(card);
         });
-        html += `</tr>`;
-    });
-
-    html += `</tbody></table>`;
-    modalBody.innerHTML = html;
-
-    document.getElementById("modal-matrix").classList.remove("hidden");
+    }
 }
 
-function exportDataset() {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state.vehicles, null, 2));
-    const downloadAnchor = document.createElement("a");
-    downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", "autospecboard_inventory.json");
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
-}
-
-document.addEventListener("DOMContentLoaded", init);
+document.addEventListener('DOMContentLoaded', () => {
+    window.vehicleManager = new VehicleManager();
+});

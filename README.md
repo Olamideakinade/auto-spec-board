@@ -8,34 +8,27 @@
 
 > 🚀 **Live Demo Available:** Test and play this project live right now: **[https://olamideakinade.github.io/auto-spec-board/](https://olamideakinade.github.io/auto-spec-board/)**
 
-Auto Spec Board is a lightweight, zero-dependency client-side web application designed for comparing automotive technical specifications, tracking vehicle inventory, and managing filterable feature matrices directly in the browser.
+## Overview
 
-## Key Capabilities
+Auto Spec Board is a high-performance web application designed for car enthusiasts, engineers, and researchers to compile, compare, and manage detailed automotive specifications. Version 1.1.0 introduces a complete visual and interactive overhaul, featuring enhanced typography, fluid animations, advanced filtering, and instant data persistence.
 
-- **Side-by-Side Comparison**: Compare up to four vehicles across performance, dimensions, and powertrain specifications.
-- **Dynamic Filtering**: Filter inventory instantly by make, body style, price ceiling, and horsepower thresholds.
-- **Local Persistence**: All custom vehicle entries and comparison states persist locally via the browser storage API.
-- **Export Utility**: Export filtered datasets or comparison sheets to structured JSON or CSV format.
+## Features
 
-## Quickstart
+- **Dynamic Spec Grid:** Instantly view key automotive metrics (Horsepower, Engine layout, Transmission, Body Style, Pricing).
+- **Instant Search & Filters:** Filter vehicles by make, body style, or sort by performance metrics.
+- **Vehicle Management:** Add custom vehicle specs with immediate local storage persistence.
+- **Data Export:** Export your entire specification board to JSON or CSV format.
+- **Responsive Design:** Optimized for desktop workstations, tablets, and mobile displays.
 
-Clone the repository and open `index.html` in any modern web browser or serve via a local static file server:
+## Getting Started
+
+Clone the repository and open `index.html` in any modern web browser or serve via a local static server:
 
 ```bash
 git clone https://github.com/Olamideakinade/auto-spec-board.git
 cd auto-spec-board
-python3 -m http.server 8080
 ```
-
-Open `http://localhost:8080` in your browser.
-
-## Architecture & Design
-
-Built entirely with vanilla web standards:
-- **`index.html`**: Semantic layout structured for responsive grid view and modal management.
-- **`style.css`**: Design system utilizing CSS custom properties, grid/flexbox layouts, and system typography without external UI frameworks.
-- **`app.js`**: Modular state container handling filtering algorithms, local storage synchronization, and DOM diffing.
 
 ## License
 
-MIT
+Distributed under the MIT License. See `LICENSE` for more information.
