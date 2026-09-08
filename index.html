@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Spec Board</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container header-content">
+            <h1 class="logo">AutoSpec<span>Board</span></h1>
+            <nav class="nav-controls">
+                <button id="btn-add-vehicle" class="btn btn-primary">Add Vehicle</button>
+                <button id="btn-export" class="btn btn-secondary">Export Data</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container main-content">
+        <section class="filter-section">
+            <div class="filter-group">
+                <label for="search-input">Search</label>
+                <input type="text" id="search-input" placeholder="Make, model, or engine...">
+            </div>
+            <div class="filter-group">
+                <label for="body-style-filter">Body Style</label>
+                <select id="body-style-filter">
+                    <option value="">All Styles</option>
+                    <option value="Sedan">Sedan</option>
+                    <option value="Coupe">Coupe</option>
+                    <option value="SUV">SUV</option>
+                    <option value="Truck">Truck</option>
+                    <option value="Wagon">Wagon</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="sort-select">Sort By</label>
+                <select id="sort-select">
+                    <option value="price-asc">Price: Low to High</option>
+                    <option value="price-desc">Price: High to Low</option>
+                    <option value="hp-desc">Horsepower: High to Low</option>
+                    <option value="year-desc">Year: Newest</option>
+                </select>
+            </div>
+        </section>
+
+        <section class="dashboard-grid">
+            <div class="inventory-column">
+                <h2>Vehicle Catalog</h2>
+                <div id="vehicle-grid" class="vehicle-grid"></div>
+            </div>
+            <div class="comparison-column">
+                <div class="comparison-header">
+                    <h2>Comparison Tray</h2>
+                    <span id="comparison-count">0 / 4</span>
+                </div>
+                <div id="comparison-tray" class="comparison-tray">
+                    <p class="placeholder-text">Select up to 4 vehicles to compare specs.</p>
+                </div>
+                <button id="btn-compare" class="btn btn-primary btn-full" disabled>Launch Matrix</button>
+            </div>
+        </section>
+    </main>
+
+    <div id="modal-vehicle" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Vehicle</h3>
+                <button id="modal-close" class="btn-close">&times;</button>
+            </div>
+            <form id="vehicle-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="input-make">Make</label>
+                        <input type="text" id="input-make" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="input-model">Model</label>
+                        <input type="text" id="input-model" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="input-year">Year</label>
+                        <input type="number" id="input-year" required value="2024">
+                    </div>
+                    <div class="form-group">
+                        <label for="input-body">Body Style</label>
+                        <select id="input-body">
+                            <option value="Sedan">Sedan</option>
+                            <option value="Coupe">Coupe</option>
+                            <option value="SUV">SUV</option>
+                            <option value="Truck">Truck</option>
+                            <option value="Wagon">Wagon</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="input-price">Price ($)</label>
+                        <input type="number" id="input-price" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="input-hp">Horsepower (HP)</label>
+                        <input type="number" id="input-hp" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="input-engine">Engine</label>
+                        <input type="text" id="input-engine" required placeholder="3.0L Twin-Turbo V6">
+                    </div>
+                    <div class="form-group">
+                        <label for="input-transmission">Transmission</label>
+                        <input type="text" id="input-transmission" required placeholder="8-Speed Automatic">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">Save Vehicle</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-matrix" class="modal hidden">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3>Specification Comparison Matrix</h3>
+                <button id="matrix-close" class="btn-close">&times;</button>
+            </div>
+            <div id="matrix-body" class="matrix-body"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
