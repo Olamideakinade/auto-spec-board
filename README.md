@@ -6,23 +6,20 @@
 
 ![Project Snapshot](preview.svg)
 
-> 🚀 **Live Demo Available:** Test and play this project live right now: **[https://olamideakinade.github.io/auto-spec-board/](https://olamideakinade.github.io/auto-spec-board/)**
+> **Live Demo Available:** Test and play this project live right now: **[https://olamideakinade.github.io/auto-spec-board/](https://olamideakinade.github.io/auto-spec-board/)**
 
 ## Overview
+Auto Spec Board is a high-performance, responsive web application designed for automotive enthusiasts and engineers to track, compare, and manage high-end vehicle specifications. Built with modern HTML5, Vanilla JavaScript, and CSS3.
 
-Auto Spec Board is a high-performance web application designed for car enthusiasts, engineers, and researchers to compile, compare, and manage detailed automotive specifications. Version 1.1.0 introduces a complete visual and interactive overhaul, featuring enhanced typography, fluid animations, advanced filtering, and instant data persistence.
+## Features (v1.2.0)
+- **Instant Search & Filtering**: Real-time filtering by make, model, and body style.
+- **Advanced Sorting**: Sort specifications instantly by Horsepower or Price.
+- **Local Persistence**: Full state retention using browser LocalStorage with fallback defaults.
+- **Data Export**: Export your custom specification boards to JSON or CSV formats.
+- **Modern Glassmorphic Design**: Clean responsive grid layouts with custom animations and micro-interactions.
 
-## Features
-
-- **Dynamic Spec Grid:** Instantly view key automotive metrics (Horsepower, Engine layout, Transmission, Body Style, Pricing).
-- **Instant Search & Filters:** Filter vehicles by make, body style, or sort by performance metrics.
-- **Vehicle Management:** Add custom vehicle specs with immediate local storage persistence.
-- **Data Export:** Export your entire specification board to JSON or CSV format.
-- **Responsive Design:** Optimized for desktop workstations, tablets, and mobile displays.
-
-## Getting Started
-
-Clone the repository and open `index.html` in any modern web browser or serve via a local static server:
+## Local Development
+Clone the repository and open `index.html` in any modern web browser.
 
 ```bash
 git clone https://github.com/Olamideakinade/auto-spec-board.git
@@ -30,5 +27,4 @@ cd auto-spec-board
 ```
 
 ## License
-
-Distributed under the MIT License. See `LICENSE` for more information.
+MIT License. See [LICENSE](LICENSE) for details.

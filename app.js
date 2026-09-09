@@ -29,8 +29,8 @@ const defaultVehicles = [
         bodyStyle: "Truck",
         price: 87000,
         hp: 835,
-        engine: "Quad-Motor Electric",
-        transmission: "Single-Speed Direct-Drive"
+        engine: "Quad Electric Motors",
+        transmission: "1-Speed Direct-Drive"
     },
     {
         id: "v4",
@@ -52,204 +52,233 @@ const defaultVehicles = [
         price: 249000,
         hp: 1234,
         engine: "Tri-Motor Electric",
-        transmission: "Single-Speed Direct-Drive"
+        transmission: "1-Speed Direct-Drive"
     },
     {
         id: "v6",
-        make: "Lamborghini",
-        model: "Huracán Sterrato",
+        make: "Ferrari",
+        model: "296 GTB",
         year: 2023,
         bodyStyle: "Coupe",
-        price: 278000,
-        hp: 602,
-        engine: "5.2L Naturally Aspirated V10",
-        transmission: "7-Speed Dual-Clutch"
+        price: 342200,
+        hp: 819,
+        engine: "3.0L Twin-Turbo V6 Hybrid",
+        transmission: "8-Speed Dual-Clutch"
     }
 ];
 
-class VehicleManager {
-    constructor() {
-        this.vehicles = this.loadVehicles();
-        this.initElements();
-        this.bindEvents();
-        this.render();
-    }
+let vehicles = [];
+let currentFilter = "all";
+let currentSearch = "";
+let currentSort = "default";
 
-    loadVehicles() {
-        const stored = localStorage.getItem('auto_spec_vehicles');
+const STORAGE_KEY = "autospec_board_vehicles_v12";
+
+document.addEventListener("DOMContentLoaded", () => {
+    loadVehicles();
+    setupEventListeners();
+    render();
+});
+
+function loadVehicles() {
+    try {
+        const stored = localStorage.getItem(STORAGE_KEY);
         if (stored) {
-            try {
-                return JSON.parse(stored);
-            } catch (e) {
-                console.error('Failed to parse stored vehicles:', e);
-            }
-        }
-        return defaultVehicles;
-    }
-
-    saveVehicles() {
-        localStorage.setItem('auto_spec_vehicles', JSON.stringify(this.vehicles));
-    }
-
-    initElements() {
-        this.vehicleGrid = document.getElementById('vehicle-grid');
-        this.searchInput = document.getElementById('search-input');
-        this.filterBody = document.getElementById('filter-body');
-        this.sortSelect = document.getElementById('sort-select');
-        this.emptyState = document.getElementById('empty-state');
-        
-        this.modal = document.getElementById('vehicle-modal');
-        this.btnAddVehicle = document.getElementById('btn-add-vehicle');
-        this.btnCloseModal = document.getElementById('btn-close-modal');
-        this.btnCancel = document.getElementById('btn-cancel');
-        this.vehicleForm = document.getElementById('vehicle-form');
-        this.btnExport = document.getElementById('btn-export');
-    }
-
-    bindEvents() {
-        this.searchInput.addEventListener('input', () => this.render());
-        this.filterBody.addEventListener('change', () => this.render());
-        this.sortSelect.addEventListener('change', () => this.render());
-
-        this.btnAddVehicle.addEventListener('click', () => this.toggleModal(true));
-        this.btnCloseModal.addEventListener('click', () => this.toggleModal(false));
-        this.btnCancel.addEventListener('click', () => this.toggleModal(false));
-        this.modal.addEventListener('click', (e) => {
-            if (e.target === this.modal) this.toggleModal(false);
-        });
-
-        this.vehicleForm.addEventListener('submit', (e) => this.handleFormSubmit(e));
-        this.btnExport.addEventListener('click', () => this.exportData());
-    }
-
-    toggleModal(show) {
-        if (show) {
-            this.modal.classList.remove('hidden');
-            this.vehicleForm.reset();
+            vehicles = JSON.parse(stored);
         } else {
-            this.modal.classList.add('hidden');
+            vehicles = [...defaultVehicles];
+            saveVehicles();
         }
+    } catch (e) {
+        console.error("Failed to load storage, falling back to defaults.", e);
+        vehicles = [...defaultVehicles];
     }
+}
 
-    handleFormSubmit(e) {
-        e.preventDefault();
-        const newVehicle = {
-            id: 'v_' + Date.now(),
-            make: document.getElementById('make').value.trim(),
-            model: document.getElementById('model').value.trim(),
-            year: parseInt(document.getElementById('year').value, 10),
-            bodyStyle: document.getElementById('bodyStyle').value,
-            price: parseFloat(document.getElementById('price').value),
-            hp: parseInt(document.getElementById('hp').value, 10),
-            engine: document.getElementById('engine').value.trim(),
-            transmission: document.getElementById('transmission').value.trim()
-        };
-
-        this.vehicles.unshift(newVehicle);
-        this.saveVehicles();
-        this.toggleModal(false);
-        this.render();
+function saveVehicles() {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(vehicles));
+    } catch (e) {
+        console.error("Failed to persist state.", e);
     }
+}
 
-    deleteVehicle(id) {
-        if (confirm('Are you sure you want to remove this vehicle specification?')) {
-            this.vehicles = this.vehicles.filter(v => v.id !== id);
-            this.saveVehicles();
-            this.render();
-        }
-    }
-
-    exportData() {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.vehicles, null, 2));
-        const downloadAnchor = document.createElement('a');
-        downloadAnchor.setAttribute("href", dataStr);
-        downloadAnchor.setAttribute("download", `auto_specs_${Date.now()}.json`);
-        document.body.appendChild(downloadAnchor);
-        downloadAnchor.click();
-        downloadAnchor.remove();
-    }
-
-    formatCurrency(amount) {
-        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
-    }
-
-    getFilteredVehicles() {
-        const query = this.searchInput.value.toLowerCase().trim();
-        const bodyFilter = this.filterBody.value;
-        const sortValue = this.sortSelect.value;
-
-        let result = this.vehicles.filter(v => {
-            const matchesSearch = 
-                v.make.toLowerCase().includes(query) ||
-                v.model.toLowerCase().includes(query) ||
-                v.engine.toLowerCase().includes(query) ||
-                v.transmission.toLowerCase().includes(query);
-            const matchesBody = bodyFilter === '' || v.bodyStyle === bodyFilter;
-            return matchesSearch && matchesBody;
+function setupEventListeners() {
+    const searchInput = document.getElementById("search-input");
+    if (searchInput) {
+        searchInput.addEventListener("input", (e) => {
+            currentSearch = e.target.value.toLowerCase().trim();
+            render();
         });
-
-        if (sortValue === 'price-asc') {
-            result.sort((a, b) => a.price - b.price);
-        } else if (sortValue === 'price-desc') {
-            result.sort((a, b) => b.price - a.price);
-        } else if (sortValue === 'hp-desc') {
-            result.sort((a, b) => b.hp - a.hp);
-        } else if (sortValue === 'year-desc') {
-            result.sort((a, b) => b.year - a.year);
-        }
-
-        return result;
     }
 
-    render() {
-        const filtered = this.getFilteredVehicles();
-        this.vehicleGrid.innerHTML = '';
+    const filterButtons = document.querySelectorAll(".filter-btn");
+    filterButtons.forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            filterButtons.forEach(b => b.classList.remove("active"));
+            e.target.classList.add("active");
+            currentFilter = e.target.dataset.filter;
+            render();
+        });
+    });
 
-        if (filtered.length === 0) {
-            this.emptyState.classList.remove('hidden');
-            return;
+    const sortSelect = document.getElementById("sort-select");
+    if (sortSelect) {
+        sortSelect.addEventListener("change", (e) => {
+            currentSort = e.target.value;
+            render();
+        });
+    }
+
+    const addBtn = document.getElementById("btn-add-vehicle");
+    const modal = document.getElementById("vehicle-modal");
+    const closeBtn = document.getElementById("close-modal");
+    const cancelBtn = document.getElementById("cancel-modal");
+
+    if (addBtn && modal) {
+        addBtn.addEventListener("click", () => modal.classList.add("open"));
+    }
+    if (closeBtn && modal) {
+        closeBtn.addEventListener("click", () => modal.classList.remove("open"));
+    }
+    if (cancelBtn && modal) {
+        cancelBtn.addEventListener("click", () => modal.classList.remove("open"));
+    }
+
+    window.addEventListener("click", (e) => {
+        if (e.target === modal) {
+            modal.classList.remove("open");
         }
+    });
 
-        this.emptyState.classList.add('hidden');
+    const form = document.getElementById("vehicle-form");
+    if (form) {
+        form.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const newVeh = {
+                id: "v_" + Date.now(),
+                make: document.getElementById("make").value.trim(),
+                model: document.getElementById("model").value.trim(),
+                year: parseInt(document.getElementById("year").value, 10),
+                bodyStyle: document.getElementById("bodyStyle").value,
+                price: parseFloat(document.getElementById("price").value),
+                hp: parseInt(document.getElementById("hp").value, 10),
+                engine: document.getElementById("engine").value.trim(),
+                transmission: document.getElementById("transmission").value.trim()
+            };
 
-        filtered.forEach(v => {
-            const card = document.createElement('div');
-            card.className = 'vehicle-card';
-            card.innerHTML = `
-                <div class="card-header">
-                    <div class="vehicle-title">
-                        <h3>${v.year} ${v.make} ${v.model}</h3>
-                        <p class="vehicle-subtitle">Vehicle Specification Record</p>
-                    </div>
-                    <span class="badge">${v.bodyStyle}</span>
-                </div>
-                <div class="card-specs">
-                    <div class="spec-item">
-                        <div class="spec-label">Horsepower</div>
-                        <div class="spec-value">${v.hp} HP</div>
-                    </div>
-                    <div class="spec-item">
-                        <div class="spec-label">Transmission</div>
-                        <div class="spec-value">${v.transmission}</div>
-                    </div>
-                </div>
-                <div class="card-details">
-                    <div><strong>Engine:</strong> ${v.engine}</div>
-                </div>
-                <div class="card-footer">
-                    <div class="vehicle-price">${this.formatCurrency(v.price)}</div>
-                    <button class="btn-danger-subtle" data-id="${v.id}">Remove</button>
-                </div>
-            `;
-            
-            const deleteBtn = card.querySelector('.btn-danger-subtle');
-            deleteBtn.addEventListener('click', () => this.deleteVehicle(v.id));
+            vehicles.unshift(newVeh);
+            saveVehicles();
+            form.reset();
+            modal.classList.remove("open");
+            render();
+        });
+    }
 
-            this.vehicleGrid.appendChild(card);
+    const exportJsonBtn = document.getElementById("btn-export-json");
+    if (exportJsonBtn) {
+        exportJsonBtn.addEventListener("click", () => {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(vehicles, null, 2));
+            const dlAnchor = document.createElement("a");
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", "auto-specs.json");
+            document.body.appendChild(dlAnchor);
+            dlAnchor.click();
+            dlAnchor.remove();
+        });
+    }
+
+    const resetBtn = document.getElementById("btn-reset");
+    if (resetBtn) {
+        resetBtn.addEventListener("click", () => {
+            if (confirm("Reset board to default factory specifications?")) {
+                vehicles = [...defaultVehicles];
+                saveVehicles();
+                render();
+            }
         });
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    window.vehicleManager = new VehicleManager();
-});
+function deleteVehicle(id) {
+    if (confirm("Are you sure you want to remove this specification?")) {
+        vehicles = vehicles.filter(v => v.id !== id);
+        saveVehicles();
+        render();
+    }
+}
+
+function render() {
+    const grid = document.getElementById("vehicle-grid");
+    const countSpan = document.getElementById("vehicle-count");
+    if (!grid) return;
+
+    let filtered = vehicles.filter(v => {
+        const matchesFilter = currentFilter === "all" || v.bodyStyle.toLowerCase() === currentFilter.toLowerCase();
+        const searchStr = `${v.make} ${v.model} ${v.engine} ${v.transmission}`.toLowerCase();
+        const matchesSearch = !currentSearch || searchStr.includes(currentSearch);
+        return matchesFilter && matchesSearch;
+    });
+
+    if (currentSort === "hp-desc") {
+        filtered.sort((a, b) => b.hp - a.hp);
+    } else if (currentSort === "price-desc") {
+        filtered.sort((a, b) => b.price - a.price);
+    } else if (currentSort === "price-asc") {
+        filtered.sort((a, b) => a.price - b.price);
+    } else if (currentSort === "make-asc") {
+        filtered.sort((a, b) => a.make.localeCompare(b.make));
+    }
+
+    if (countSpan) {
+        countSpan.textContent = `${filtered.length} vehicle${filtered.length === 1 ? "" : "s"} found`;
+    }
+
+    if (filtered.length === 0) {
+        grid.innerHTML = `
+            <div class="empty-state">
+                <h3>No specifications match your query</h3>
+                <p>Try refining your search parameters or filter options.</p>
+            </div>
+        `;
+        return;
+    }
+
+    grid.innerHTML = filtered.map(v => `
+        <article class="vehicle-card">
+            <div class="card-header">
+                <span class="badge badge-style">${v.bodyStyle}</span>
+                <span class="vehicle-year">${v.year}</span>
+            </div>
+            <div class="card-body">
+                <h2 class="vehicle-title">${v.make} <strong>${v.model}</strong></h2>
+                <div class="spec-grid">
+                    <div class="spec-item">
+                        <span class="spec-label">Horsepower</span>
+                        <span class="spec-value highlight-hp">${v.hp} HP</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label">MSRP</span>
+                        <span class="spec-value highlight-price">$${v.price.toLocaleString()}</span>
+                    </div>
+                </div>
+                <div class="spec-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Engine</span>
+                        <span class="detail-val">${v.engine}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Transmission</span>
+                        <span class="detail-val">${v.transmission}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <button class="btn-delete" onclick="deleteVehicle('${v.id}')" title="Remove Specification">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    <span>Remove</span>
+                </button>
+            </div>
+        </article>
+    `).join("");
+}
