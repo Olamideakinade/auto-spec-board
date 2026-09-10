@@ -8,20 +8,19 @@
 
 > **Live Demo Available:** Test and play this project live right now: **[https://olamideakinade.github.io/auto-spec-board/](https://olamideakinade.github.io/auto-spec-board/)**
 
-## Overview
+Auto Spec Board is a high-performance web application designed for automotive enthusiasts and engineers to track, compare, and analyze detailed vehicle specifications.
 
-Auto Spec Board is a high-performance, responsive web application built with HTML5, Vanilla JavaScript, and CSS3 designed for automotive enthusiasts and engineers to track, compare, and manage high-performance vehicle specifications.
+## Features in v1.4.0
 
-## Features
-
-- **Dynamic Vehicle Specification Grid:** Interactive glassmorphic cards displaying detailed powertrain metrics.
-- **Advanced Sorting & Filtering:** Real-time search across makes, models, horsepower, and pricing.
-- **Local Persistence & Factory Reset:** Store custom vehicle entries safely with reliable state management.
-- **Integrated Test Suite & Benchmarks (v1.3.0):** Built-in unit tests and performance benchmarks to verify functionality and speed.
+- **Fleet Analytics Dashboard:** Real-time statistics on total vehicles, average price, and average horsepower.
+- **Data Portability:** Export your entire specification database to JSON and import backups seamlessly.
+- **Keyboard Shortcuts:** Press `Ctrl+K` or `Cmd+K` to instantly focus the search bar.
+- **Advanced Filtering & Sorting:** Filter by make, body style, and price with zero-latency response.
+- **Responsive Architecture:** Clean HTML5, Vanilla JavaScript, and CSS3 codebase free of bloated dependencies.
 
 ## Getting Started
 
-Clone the repository and open `index.html` in any modern web browser or serve via a local static web server.
+Clone the repository and launch `index.html` in any modern web browser or serve via a local static web server.
 
 ```bash
 git clone https://github.com/Olamideakinade/auto-spec-board.git
