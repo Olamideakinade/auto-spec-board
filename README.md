@@ -9,17 +9,19 @@
 > **Live Demo Available:** Test and play this project live right now: **[https://olamideakinade.github.io/auto-spec-board/](https://olamideakinade.github.io/auto-spec-board/)**
 
 ## Overview
-Auto Spec Board is a high-performance, responsive web application designed for automotive enthusiasts and engineers to track, compare, and manage high-end vehicle specifications. Built with modern HTML5, Vanilla JavaScript, and CSS3.
 
-## Features (v1.2.0)
-- **Instant Search & Filtering**: Real-time filtering by make, model, and body style.
-- **Advanced Sorting**: Sort specifications instantly by Horsepower or Price.
-- **Local Persistence**: Full state retention using browser LocalStorage with fallback defaults.
-- **Data Export**: Export your custom specification boards to JSON or CSV formats.
-- **Modern Glassmorphic Design**: Clean responsive grid layouts with custom animations and micro-interactions.
+Auto Spec Board is a high-performance, responsive web application built with HTML5, Vanilla JavaScript, and CSS3 designed for automotive enthusiasts and engineers to track, compare, and manage high-performance vehicle specifications.
 
-## Local Development
-Clone the repository and open `index.html` in any modern web browser.
+## Features
+
+- **Dynamic Vehicle Specification Grid:** Interactive glassmorphic cards displaying detailed powertrain metrics.
+- **Advanced Sorting & Filtering:** Real-time search across makes, models, horsepower, and pricing.
+- **Local Persistence & Factory Reset:** Store custom vehicle entries safely with reliable state management.
+- **Integrated Test Suite & Benchmarks (v1.3.0):** Built-in unit tests and performance benchmarks to verify functionality and speed.
+
+## Getting Started
+
+Clone the repository and open `index.html` in any modern web browser or serve via a local static web server.
 
 ```bash
 git clone https://github.com/Olamideakinade/auto-spec-board.git
@@ -27,4 +29,5 @@ cd auto-spec-board
 ```
 
 ## License
-MIT License. See [LICENSE](LICENSE) for details.
+
+Distributed under the MIT License. See `LICENSE` for more information.
